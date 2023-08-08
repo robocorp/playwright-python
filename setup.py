@@ -59,6 +59,18 @@ def download_driver(zip_name: str) -> None:
     subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
 
 
+def patch_driver(driver_path: str)->None:
+    print(f"== Patching to {driver_path}")
+    print(f"== Copy patch zip from: ../playwright/utils/robocorp_patch.zip")
+    shutil.copyfile("../playwright/utils/robocorp_patch.zip", "./build/robocorp_patch.zip")
+    print(f"== Unpacking to: ./build/robocorp_patch")
+    shutil.unpack_archive("./build/robocorp_patch.zip", "./build/robocorp_patch", "zip")
+    print(f"== Patching files...")
+    shutil.copytree( "./build/robocorp_patch/lib", os.path.join(driver_path, "package/lib"), dirs_exist_ok=True)
+    shutil.copyfile( "./build/robocorp_patch/browsers.json", os.path.join(driver_path, "package/browsers.json"))
+    print(f"== Done patching!")
+
+
 class PlaywrightBDistWheelCommand(BDistWheelCommand):
     user_options = BDistWheelCommand.user_options + [
         ("all", "a", "create wheels for all platforms")
@@ -121,6 +133,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             },
         ]
         self._download_and_extract_local_driver(base_wheel_bundles)
+        patch_driver("playwright/driver")
 
         wheels = base_wheel_bundles
         if not self.all:
@@ -147,6 +160,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             )
             with zipfile.ZipFile(zip_file, "r") as zip:
                 extractall(zip, f"driver/{wheel_bundle['zip_name']}")
+                patch_driver(f"driver/{wheel_bundle['zip_name']}")
             wheel_location = without_platform + wheel_bundle["wheel"]
             shutil.copy(base_wheel_location, wheel_location)
             with zipfile.ZipFile(wheel_location, "a") as zip:
@@ -198,16 +212,16 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
 
 
 setup(
-    name="playwright",
-    author="Microsoft Corporation",
+    name="robocorp-playwright",
+    author="Robocorp/Microsoft",
     author_email="",
     description="A high-level API to automate web browsers",
     long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     license="Apache-2.0",
-    url="https://github.com/Microsoft/playwright-python",
+    url="https://github.com/robocorp/playwright-python",
     project_urls={
-        "Release notes": "https://github.com/microsoft/playwright-python/releases",
+        "Release notes": "https://github.com/robocorp/playwright-python/releases",
     },
     packages=["playwright"],
     include_package_data=True,
