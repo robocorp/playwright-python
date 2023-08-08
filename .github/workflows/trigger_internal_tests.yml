@@ -1,10 +1,11 @@
 name: "Internal Tests"
 
 on:
-  push:
-    branches:
-      - main
-      - release-*
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+  #     - release-*
 
 jobs:
   trigger:

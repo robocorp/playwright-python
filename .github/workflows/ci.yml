@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - release-*
+      - robocorp-release-*
   pull_request:
     branches:
       - main
       - release-*
+      - robocorp-release-*
 
 concurrency:
   # For pull requests, cancel all currently-running jobs for this workflow
